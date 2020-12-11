@@ -1,43 +1,42 @@
-# pytimer
-
-在模型训练或数据处理中，常常涉及代码段的计时，这里给出优雅的计时器实现。
-
-
-例子一，作为上下文管理器，
-
-```python
 import urllib.request as request
-from pytimer import Timer
+from pytimer import timethis
 
-def task(n):
-    for _ in range(n):
-        request.urlopen("https://httpbin.org/")
-
-with Timer(label="request url") as timer:
-    task(5)
-
-print(timer.elapsed)
-```
-
-例子二，作为装饰器，
-
-```python
-import urllib.request as request
-from pytimer import Timer
-
-@Timer(label="time url request")
+@timethis(label="time url request")
 def task(n):
     for _ in range(n):
         request.urlopen("https://httpbin.org/")
 
 task(1)
-```
 
-例子三，在类中使用，
+# change timer
 
-```python
-import urllib.request as request
-from pytimer import timethis
+from time import perf_counter
+
+@timethis(label="time url request", timer=perf_counter)
+def task(n):
+    for _ in range(n):
+        request.urlopen("https://httpbin.org/")
+
+task(1)
+
+# use callback
+
+elapsed = 0
+def set_value(t):
+    global elapsed
+    elapsed = t
+
+@timethis(label="time url request", callback=set_value)
+def task(n):
+    for _ in range(n):
+        request.urlopen("https://httpbin.org/")
+
+task(1)
+
+print(elapsed)
+
+# use in a class
+
 
 class Task:
 
@@ -59,4 +58,3 @@ task = Task()
 task.urlopen1("https://httpbin.org/")
 task.urlopen2("https://httpbin.org/")
 task.urlopen3("https://httpbin.org/")
-```
